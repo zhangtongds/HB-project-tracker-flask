@@ -79,6 +79,27 @@ def get_project_by_title(title):
     return row
 
 
+def make_new_project(title, description, max_grade):
+    """Add a new student and print confirmation.
+
+    Given a first name, last name, and GitHub account, add student to the
+    database and print a confirmation message.
+    """
+
+    QUERY = """
+        INSERT INTO Projects (title, description, max_grade)
+          VALUES (:title, :description, :max_grade)
+        """
+
+    db.session.execute(QUERY, {'title': title,
+                               'description': description,
+                               'max_grade': max_grade})
+    db.session.commit()
+
+    return "Successfully added project: {title}".format(
+        title=title)
+
+
 def get_grade_by_github_title(github, title):
     """Print grade student received for a project."""
 
@@ -103,13 +124,35 @@ def assign_grade(github, title, grade):
     """Assign a student a grade on an assignment and print a confirmation."""
 
     QUERY = """
+        SELECT grade
+          FROM Grades
+          WHERE student_github = :github
+          AND project_title = :title
+        """
+
+    INSERT = """
         INSERT INTO Grades (student_github, project_title, grade)
           VALUES (:github, :title, :grade)
         """
 
-    db_cursor = db.session.execute(QUERY, {'github': github,
-                                           'title': title,
-                                           'grade': grade})
+    UPDATE = """
+        UPDATE Grades
+          SET grade = :grade
+          WHERE student_github = :github
+          AND project_title = :title
+        """
+
+    if db.session.execute(QUERY, {'github': github,
+                                  'title': title})
+
+        db_cursor = db.session.execute(UPDATE, {'github': github,
+                                                'title': title,
+                                                'grade': grade})
+    else:
+
+        db_cursor = db.session.execute(INSERT, {'github': github,
+                                                'title': title,
+                                                'grade': grade})
 
     db.session.commit()
 

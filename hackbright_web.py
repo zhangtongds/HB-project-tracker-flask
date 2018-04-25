@@ -96,6 +96,50 @@ def get_project():
 	return html
 
 
+@app.route("/project-add")
+def project_add():
+	"""Show form for adding a project."""
+
+	return render_template("project_add.html")
+
+
+
+@app.route("/project-add-post", methods=['POST'])
+def project_add_post():
+	"""Add a project."""
+
+	title = request.form['title']
+	description = request.form['description']
+	max_grade = request.form['max_grade']
+
+	hackbright.make_new_project(title, description, max_grade)
+
+	return render_template("project_add_post.html",
+						   title=title)
+
+
+@app.route("/assign-grade")
+def assign_grade():
+
+	students = hackbright.get_all_students()
+	projects = hackbright.get_all_projects()
+
+
+	return render_template("assign_grade.html",
+						   students=students,
+						   projects=projects)
+
+@app.route("/assign-grade-post", methods=['POST'])
+def assign_grade_post():
+
+	student = request.form['student']
+	project = request.form['project']
+
+	grade = min(request.form['grade'], get_project_by_title(project)[2])
+
+	
+
+
 if __name__ == "__main__":
     hackbright.connect_to_db(app)
     app.run(debug=True)
