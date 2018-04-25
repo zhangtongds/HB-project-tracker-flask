@@ -8,6 +8,28 @@ app = Flask(__name__)
 app.secret_key = 'this-is-a-secret'
 
 
+@app.route("/")
+def homepage():
+	"""Lists all students and projects."""
+
+	students = hackbright.get_all_students()
+	projects = hackbright.get_all_projects()
+
+	for student in students:
+		print student
+		print type(student)
+
+
+	print projects
+	print type(projects)
+	for project in projects:
+		print project
+		print type(project)
+
+	return render_template("homepage.html", students=students,
+											projects=projects)
+
+
 @app.route("/student")
 def get_student():
     """Show information about a student."""
@@ -54,6 +76,24 @@ def student_add_post():
     					   first=first,
     					   last=last,
     					   github=github)
+
+
+@app.route("/project")
+def get_project():
+	"""Displays info about a project."""
+
+	title = request.args.get('title')
+
+	title, desc, max_grade = hackbright.get_project_by_title(title)
+	grades = hackbright.get_grades_by_title(title)
+
+	html = render_template("project_info.html",
+						   title=title,
+						   desc=desc,
+						   max_grade=max_grade,
+						   grades=grades)
+
+	return html
 
 
 if __name__ == "__main__":
